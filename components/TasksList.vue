@@ -13,6 +13,19 @@
             </n-button>
 
           </template>
+
+          <template #suffix>
+            <n-button circle
+                      quaternary
+                      size="small"
+                      type="error"
+            @click="taskStore.deleteTask(task.id)">
+              <template #icon>
+                <n-icon><trash-icon/></n-icon>
+              </template>
+            </n-button>
+
+          </template>
           <n-text :delete="task.status == TaskStatus.DONE" :depth="task.status == TaskStatus.DONE ? 3 : 1">{{ task.name }}</n-text>
         </n-list-item>
       </transition-group>
@@ -28,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import {Check as CheckIcon, Wind as WindIcon} from '@vicons/fa'
+import {Check as CheckIcon, Wind as WindIcon, TrashAltRegular as TrashIcon} from '@vicons/fa'
 import {Task, TaskStatus} from "~/types/entities/Task";
 
 const taskStore = useTaskStore()

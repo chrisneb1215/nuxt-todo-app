@@ -34,7 +34,13 @@ export const useTaskStore = defineStore({
         },
 
         deleteTask(id: number) {
-            this.tasks = this.tasks.filter(t => t.id !== id)
+            const taskIndex = this.tasks.findIndex(task => task.id === id);
+
+            // Check if the task with the specified id was found
+            if (taskIndex !== -1) {
+                // Remove the task from the array
+                this.tasks.splice(taskIndex, 1);
+            }
             localStorage.setItem('tasks', JSON.stringify(this.tasks))
         },
 
