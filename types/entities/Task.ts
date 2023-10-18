@@ -4,7 +4,7 @@ export interface Task {
     /**
      * Represents the Task status
      */
-    isDone: TaskStatus
+    status: TaskStatus
 }
 
 export enum TaskStatus {
