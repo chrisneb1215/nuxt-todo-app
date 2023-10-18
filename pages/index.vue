@@ -19,11 +19,6 @@
                 </template>
                 Done
               </n-button>
-<!--              <n-button :dashed="filters.length < 2" type="info" @click="filters = [TaskStatus.DONE, TaskStatus.PENDING]">-->
-<!--                Show All-->
-<!--              </n-button>-->
-
-              <n-switch v-model:value="showAll" :checked-value="1" :unchecked-value="0" @update:value="handleToggleAll" />
             </n-space>
           </template>
           <template #header-extra>
@@ -45,7 +40,7 @@
                 </n-button>
               </template>
             </n-input>
-            <small class="text-9px text-gray:50">Hit <n-text code>Enter</n-text> to add task</small>
+            <small class="text-9px text-gray:50" style="color: grey; margin-left: 16px;">Hit <n-text code>Enter</n-text>  or click <n-text code>+</n-text> button to add a new todo</small>
           </template>
         </n-card>
   </client-only>
@@ -56,10 +51,6 @@ import {Plus as AddIcon, TrashAltRegular as TrashIcon} from "@vicons/fa"
 import TaskList from "~/components/TasksList.vue"
 import {createDiscreteApi} from "naive-ui"
 import {TaskStatus} from "~/types/entities/Task";
-
-const { dialog } = createDiscreteApi(
-    ['dialog']
-)
 
 const taskStore = useTaskStore()
 
@@ -104,6 +95,10 @@ const handleAddTask = () => {
     newTask.value = ''
   }
 }
+
+const { dialog } = createDiscreteApi(
+    ['dialog']
+)
 const handleDeleteAll = () => {
     dialog.warning({
       title: 'Confirm',

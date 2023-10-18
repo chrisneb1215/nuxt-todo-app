@@ -1,6 +1,6 @@
 <template>
-    <n-list v-show="tasks.length" :show-divider="false" clickable hoverable>
-      <transition-group  mode="out-in" name="list">
+    <n-list v-show="taskStore.tasks.length" :show-divider="false" clickable hoverable>
+      <transition-group  name="list">
         <n-list-item v-for="task in tasks" :key="`task-${task.id}`" class="task-item" @click="taskStore.toggleTaskStatus(task.id)">
           <template #prefix>
             <n-button :dashed="task.status == TaskStatus.PENDING"
@@ -31,7 +31,7 @@
       </transition-group>
     </n-list>
 
-    <n-empty v-show="!tasks.length" class="empty-list" description="You have no active tasks" size="huge">
+    <n-empty v-show="!taskStore.tasks.length" class="empty-list" description="You have no tasks" size="huge">
       <template #icon>
         <n-icon>
           <wind-icon />
