@@ -1,160 +1,137 @@
 <template>
   <client-only>
-        <n-card :segmented="{
-      content: true,
-    }" content-style="    padding: 16px;
-    max-height: 600px;
-    overflow-y: overlay; overflow-x: hidden; min-height: 200px; display: grid; position: relative; transition: height 0.3s;" header-style="padding: 16px;" size="huge">
-          <template #header>
-            <n-space>
-              <n-button :dashed="filters.includes(TaskStatus.PENDING)" :focusable="false" :quaternary="!filters.includes(TaskStatus.PENDING)" round type="warning" @click="toggleArrayValue(TaskStatus.PENDING)">
-                <template #icon>
-                  <n-badge :max="99" :value="pendingTasks" show-zero type="warning"/>
-                </template>
-                Pending
-              </n-button>
-              <n-button :dashed="filters.includes(TaskStatus.DONE)" :focusable="false" :quaternary="!filters.includes(TaskStatus.DONE)" round type="success" @click="toggleArrayValue(TaskStatus.DONE)">
-                <template #icon>
-                  <n-badge :max="99" :value="taskStore.getDoneTasks.length" show-zero type="success"/>
-                </template>
-                Done
-              </n-button>
-            </n-space>
-          </template>
-          <template #header-extra>
-              <n-button :focusable="false" quaternary round size="tiny" type="error" @click="handleDeleteAll">
-                <template #icon>
-                  <n-icon><trash-icon/></n-icon>
-                </template>
-                Delete All Tasks
-              </n-button>
-          </template>
-          <task-list :tasks="filters.length ? taskStore.tasks.filter(item => filters.includes(item.status)) : taskStore.tasks"/>
-          <template #action>
-            <n-input v-model:value="newTask" placeholder="Add new todo" round size="large" @keydown="handleKeyEnter">
-              <template #suffix>
-                <n-button circle type="primary" @click="handleAddTask">
-                  <template #icon>
-                    <n-icon><add-icon/></n-icon>
-                  </template>
-                </n-button>
-              </template>
-            </n-input>
-            <small class="text-9px text-gray:50" style="color: grey; margin-left: 16px;">Hit <n-text code>Enter</n-text>  or click <n-text code>+</n-text> button to add a new todo</small>
-          </template>
-        </n-card>
+    <div style="display: flex; flex-direction: column; gap: 12px;">
+      <n-grid x-gap="12" :cols="2">
+        <n-gi style="display: flex; justify-content: start">
+          <img src="~/assets/vue-logo.svg" width="24"/>
+          <n-h2 style="margin: 0 6px; font-weight: 400">
+            <n-text depth="3" type="default" >Vue.js <n-text type="success" strong >ToDo</n-text> List</n-text>
+          </n-h2>
+        </n-gi>
+        <n-gi style="display: flex; justify-content: end; align-items: flex-end" >
+          <n-button :focusable="false" quaternary size="tiny" type="error" @click="handleDeleteAll">
+            <template #icon>
+              <n-icon><trash-icon/></n-icon>
+            </template>
+            Delete All
+          </n-button>
+        </n-gi>
+      </n-grid>
+
+      <n-card
+          class="todo-card"
+          size="huge"
+          :segmented="{content: true}">
+
+        <template #header>
+          <CardHeader :filter="filter" @change="handleFilterChange"/>
+        </template>
+
+        <template #header-extra>
+          <n-button
+              style="align-self: self-end" :focusable="false"
+              quaternary size="tiny"
+              type="default"
+              @click="handleDeleteDone">
+            Clear done tasks
+          </n-button>
+        </template>
+
+        <TaskList :tasks="filteredTasks"/>
+
+        <template #action>
+          <TodoInput />
+        </template>
+      </n-card>
+    </div>
+
+    <FabMessage message="This application uses the browser's Local Storage to store data"/>
+
   </client-only>
 </template>
 
 <script lang="ts" setup>
-import {Plus as AddIcon, TrashAltRegular as TrashIcon} from "@vicons/fa"
-import TaskList from "~/components/TasksList.vue"
+import {TrashAltRegular as TrashIcon} from "@vicons/fa"
+import {CardHeader, TaskList, TodoInput, FabMessage} from '~/components'
 import {createDiscreteApi} from "naive-ui"
-import {TaskStatus} from "~/types/entities/Task";
+import {TaskStatus} from "~/types/entities/Task"
 
 const taskStore = useTaskStore()
 
-// Initialize tasks from localStorage
+
 onMounted(() => {
+  // Initialize tasks from localStorage
   taskStore.initTasks()
 })
 
-const newTask = ref('')
+const filter = ref<TaskStatus | null>(null)
 
-const showAll = ref(0)
-
-
-
-const toggleArrayValue = (filter: any) => {
-  filters.value = filters.value.includes(filter)
-      ? filters.value.filter(el => el !== filter)
-      : [...filters.value, filter]
+const handleFilterChange = (val: TaskStatus | null) => {
+  filter.value = val
 }
 
-
-const handleToggleAll = (value: boolean) => {
-  if(value) {
-    filters.value = [TaskStatus.DONE, TaskStatus.PENDING]
-  }else {
-    filters.value = [TaskStatus.PENDING]
-  }
-}
-const filters = ref([])
-
-watch(filters, async (newFilter) => {
-  if (newFilter.length > 1) {
-    showAll.value = 1
-  }else {
-    showAll.value = 0
-  }
+const filteredTasks = computed(() => {
+  return filter.value !== null ? taskStore.tasks.filter(item => item.status == filter.value) : taskStore.tasks
 })
-
-const handleAddTask = () => {
-  if (newTask.value.trim() !== '') {
-    taskStore.addTask(newTask.value)
-    newTask.value = ''
-  }
-}
 
 const { dialog } = createDiscreteApi(
     ['dialog']
 )
-const handleDeleteAll = () => {
-    dialog.warning({
-      title: 'Confirm',
-      content: 'Are you sure you want to delete all your tasks?',
-      positiveText: 'Yes',
-      negativeText: 'No',
-      onPositiveClick: () => {
-        taskStore.deleteAllTasks()
-      },
-    })
-  }
 
-const handleKeyEnter = (event: { keyCode: number }) => {
-  if (event.keyCode === 13) {
-    // Enter key was pressed
-    handleAddTask()
-  }
+const handleDeleteDone = () => {
+  dialog.warning({
+    title: 'Confirm',
+    showIcon: false,
+    content: `Are you sure you want to clear (${taskStore.getDoneTasks.length}) DONE tasks?`,
+    positiveText: 'Yes',
+    negativeText: 'No',
+    onPositiveClick: () => {
+      taskStore.tasks = taskStore.tasks.filter(item => item.status !== TaskStatus.DONE)
+    },
+  })
 }
 
-const pendingTasks = computed(() => {
-  return taskStore.getPendingTasks.length
-})
+const handleDeleteAll = () => {
+  dialog.warning({
+    title: 'Confirm',
+    content: 'Are you sure you want to delete all your tasks?',
+    positiveText: 'Yes, Delete All',
+    negativeText: 'No',
+    onPositiveClick: () => {
+      taskStore.deleteAllTasks()
+      filter.value = null
+    },
+  })
+}
 </script>
 
 <style lang="scss">
-html, body {
-  height: 100vh;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  display: flex;
-  width: 100vw;
-  align-items: stretch;
-  flex-direction: column;
-  justify-content: center;
-}
-
 .n-input .n-input-wrapper {
   padding-right: 4px;
 }
 
-#__nuxt {
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-}
-
-.n-card {
+.n-card.todo-card {
   width: 100%;
   max-width: 500px;
   max-height: 500px;
+  border-radius: 8px;
 
   > .n-card__action {
     padding: 16px;
   }
+    .n-card__content {
+      padding: 16px;
+      max-height: 600px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 200px;
+      display: grid;
+      position: relative;
+      transition: height 0.3s;
+    }
+
+    .n-card-header {
+      padding: 16px;
+    }
 }
 </style>

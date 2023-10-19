@@ -1,9 +1,10 @@
 <template>
-    <n-list v-show="taskStore.tasks.length" :show-divider="false" clickable hoverable>
-      <transition-group  name="list">
-        <n-list-item v-for="task in tasks" :key="`task-${task.id}`" class="task-item" @click="taskStore.toggleTaskStatus(task.id)">
+    <n-list :show-divider="false" hoverable>
+      <transition-group v-show="taskStore.tasks.length" name="list" class="task-item" tag="div">
+        <template v-for="task in tasks" :key="`task-${task.id}`" >
+          <n-list-item >
           <template #prefix>
-            <n-button :dashed="task.status == TaskStatus.PENDING"
+            <n-button :dashed="task.status == TaskStatus.PENDING" @click="taskStore.toggleTaskStatus(task.id)"
                       :focusable="false" :type="task.status == TaskStatus.DONE ? 'success' : 'default'"
                       circle
                       size="small">
@@ -11,15 +12,14 @@
                 <n-icon :color="task.status == TaskStatus.PENDING ? '#BABABA' : ''"><check-icon/></n-icon>
               </template>
             </n-button>
-
           </template>
 
           <template #suffix>
-            <n-button circle
+            <n-button circle class="delete-button"
                       quaternary
                       size="small"
                       type="error"
-            @click="taskStore.deleteTask(task.id)">
+                      @click="taskStore.deleteTask(task.id)">
               <template #icon>
                 <n-icon><trash-icon/></n-icon>
               </template>
@@ -28,21 +28,18 @@
           </template>
           <n-text :delete="task.status == TaskStatus.DONE" :depth="task.status == TaskStatus.DONE ? 3 : 1">{{ task.name }}</n-text>
         </n-list-item>
+        </template>
+
       </transition-group>
     </n-list>
 
-    <n-empty v-show="!taskStore.tasks.length" class="empty-list" description="You have no tasks" size="huge">
-      <template #icon>
-        <n-icon>
-          <wind-icon />
-        </n-icon>
-      </template>
-    </n-empty>
+    <EmptyPlaceholder v-show="!taskStore.tasks.length" />
 </template>
 
 <script lang="ts" setup>
-import {Check as CheckIcon, Wind as WindIcon, TrashAltRegular as TrashIcon} from '@vicons/fa'
+import {Check as CheckIcon, TrashAltRegular as TrashIcon} from '@vicons/fa'
 import {Task, TaskStatus} from "~/types/entities/Task";
+import {EmptyPlaceholder} from "~/components";
 
 const taskStore = useTaskStore()
 
@@ -78,7 +75,7 @@ const buttonType = {
   position: absolute;
 }
 
-.n-list {
+.n-list .task-item {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -86,9 +83,21 @@ const buttonType = {
 
 .n-list .n-list-item {
   transition: all 0.5s ease;
+
+  .delete-button {
+    opacity: 0;
+    transition: all 0.5s ease;
+  }
+
+  &:hover {
+    .delete-button {
+      opacity: 1;
+    }
+  }
 }
 
-.n-list-item.task-item {
+.task-item .n-list-item {
+  --n-border-radius: 8px;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
 }

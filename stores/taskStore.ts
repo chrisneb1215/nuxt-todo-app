@@ -6,9 +6,9 @@ export const useTaskStore = defineStore({
         tasks: [] as Task[]
     }),
     getters: {
-        getTasks: (state) => state.tasks,
-        getDoneTasks: (state) => state.tasks.filter(t => t.status === TaskStatus.DONE),
-        getPendingTasks: (state) => state.tasks.filter(t => t.status === TaskStatus.PENDING)
+        getTasks: ({tasks}) => tasks,
+        getDoneTasks: ({tasks}) => tasks.filter(t => t.status === TaskStatus.DONE),
+        getPendingTasks: ({tasks}) => tasks.filter(t => t.status === TaskStatus.PENDING)
     },
     actions: {
         initTasks() {
@@ -26,10 +26,13 @@ export const useTaskStore = defineStore({
         },
 
         toggleTaskStatus(id: number) {
-            const task = this.tasks.find(t => t.id === id);
+            const task: Task | undefined = this.tasks.find((t: Task) => t.id === id);
             if (task) {
-                task.status = task.status === TaskStatus.PENDING ? TaskStatus.DONE : TaskStatus.PENDING;
-                localStorage.setItem('tasks', JSON.stringify(this.tasks));
+                setTimeout(() =>{
+                    task.status = task.status === TaskStatus.PENDING ? TaskStatus.DONE : TaskStatus.PENDING;
+                    localStorage.setItem('tasks', JSON.stringify(this.tasks));
+                })
+
             }
         },
 
@@ -38,19 +41,18 @@ export const useTaskStore = defineStore({
 
             // Check if the task with the specified id was found
             if (taskIndex !== -1) {
-                // Remove the task from the array
-                this.tasks.splice(taskIndex, 1);
+                this.tasks.splice(taskIndex, 1)
+                localStorage.setItem('tasks', JSON.stringify(this.tasks))
             }
-            localStorage.setItem('tasks', JSON.stringify(this.tasks))
         },
 
         deleteAllTasks() {
-            const delay = 200; // Initial delay in milliseconds
+            const delay = 200
 
             for (let i = 0; i < this.tasks.length; i++) {
                 setTimeout(() => {
-                    this.tasks.pop();
-                }, i * delay);
+                    this.tasks.pop()
+                }, i * delay)
             }
 
             localStorage.removeItem('tasks')

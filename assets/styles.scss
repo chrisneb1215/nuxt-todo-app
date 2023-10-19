@@ -1,0 +1,20 @@
+#__nuxt {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+html, body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  width: 100vw;
+  align-items: stretch;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(to top, #f0f6f3, white);
+}

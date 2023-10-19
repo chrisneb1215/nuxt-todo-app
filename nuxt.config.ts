@@ -5,6 +5,7 @@ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers'
 
 export default defineNuxtConfig({
   // devtools: { enabled: true },
+  css: ['~/assets/styles.scss'],
   modules: ['@pinia/nuxt'],
   imports: {
     dirs: ['./utils/*'],
