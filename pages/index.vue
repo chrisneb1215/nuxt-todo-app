@@ -86,7 +86,7 @@ const handleDeleteDone = () => {
     positiveText: 'Yes',
     negativeText: 'No',
     onPositiveClick: () => {
-      taskStore.tasks = taskStore.tasks.filter(item => item.status !== TaskStatus.DONE)
+      taskStore.deleteDoneTasks()
     },
   })
 }

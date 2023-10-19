@@ -46,6 +46,11 @@ export const useTaskStore = defineStore({
             }
         },
 
+        deleteDoneTasks() {
+            this.tasks = this.tasks.filter(item => item.status !== TaskStatus.DONE)
+            localStorage.setItem('tasks', JSON.stringify(this.tasks))
+        },
+
         deleteAllTasks() {
             const delay = 200
 
